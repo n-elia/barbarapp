@@ -51,3 +51,10 @@ tasks:
     desc: "Quick check of DB tables (requires sqlite3 CLI)"
     cmds:
       - sqlite3 data/data.db ".tables" || echo "sqlite3 not installed or DB missing"
+
+  export-req-txt:
+    desc: "Export current environment packages to requirements.txt"
+    cmds:
+      - echo "Exporting installed packages to requirements.txt..."
+      - uv export --no-hashes --format requirements-txt > requirements.txt
+      - echo "requirements.txt updated."
