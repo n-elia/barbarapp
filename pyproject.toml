@@ -1,0 +1,19 @@
+[project]
+name = "darts-planner"
+version = "0.1.0"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "alembic",
+    "argon2-cffi",
+    "bcrypt>=5.0.0",
+    "cryptography",
+    "pandas",
+    "passlib[bcrypt]",
+    "python-dateutil",
+    "python-dotenv",
+    "sqlalchemy",
+    "st-diff-viewer>=1.0.7",
+    "streamlit",
+    "validators",
+]

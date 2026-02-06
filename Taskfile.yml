@@ -1,0 +1,53 @@
+# Taskfile for common development tasks
+# Requires: https://taskfile.dev/
+
+version: '3'
+
+tasks:
+  run:
+    desc: "Run the Streamlit app (dev)"
+    cmds:
+      - echo "Starting Streamlit via uv..."
+      - uv run streamlit run app.py
+
+  reset-db:
+    desc: "Reset the SQLite database (delete and reinitialize)"
+    cmds:
+      - |-
+        if [ -f data/data.db ]; then
+          rm data/data.db
+          echo "Removed existing data/data.db"
+        else
+          echo "No existing data/data.db found"
+        fi
+      - |
+        uv run python - <<'PY'
+        from libs.db import init_db, get_db_path
+        init_db(get_db_path())
+        print('Database initialized')
+        PY
+
+  build:
+    desc: "Run quick project build checks: syntax, optional lint"
+    cmds:
+      - echo "Running syntax checks (py_compile)"
+      - uv run python -m py_compile app.py views/*.py app_pages/*.py libs/*.py
+      - echo "Running ruff lint (if installed)"
+      - uv run ruff check . || echo "ruff not installed; skipping lint"
+
+  build-image:
+    desc: "Build Docker image tagged 'barbarapp:latest'"
+    cmds:
+      - echo "Building Docker image..."
+      - docker build -t barbarapp:latest .
+
+  run-image:
+    desc: "Run Docker image (exposes port 8501)"
+    cmds:
+      - echo "Running Docker container (map 8501:8501)..."
+      - docker run --rm -p 8501:8501 barbarapp:latest
+
+  show-db:
+    desc: "Quick check of DB tables (requires sqlite3 CLI)"
+    cmds:
+      - sqlite3 data/data.db ".tables" || echo "sqlite3 not installed or DB missing"
