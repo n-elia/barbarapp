@@ -1,49 +1,88 @@
-BarbarApp (Streamlit)
+# BarbarApp — Darts Planner
 
-Quick start
+A small Streamlit application to plan matches and track attendance.
 
-1. Create a Python venv and install dependencies:
+## Setup
 
-```bash
-# using `uv` (recommended)
-uv venv create
-uv sync --active
+### Prerequisites
 
-
-Run with uv
+Install `uv` and `task` (one-time setup):
 
 ```bash
-# Run the Streamlit app using uv-managed Python/environment
-uv run streamlit run app.py
+# Install uv (Python package manager and environment tool)
+python -m pip install --upgrade pip
+python -m pip install uv
 
-# Run a quick syntax check using uv-managed Python
-uv run python -m py_compile app.py libs/**/*.py pages/**/*.py
+# Install task (task runner; see https://taskfile.dev/)
+# On macOS with Homebrew:
+brew install go-task
+
+# On Linux, or other systems:
+# Download from https://taskfile.dev/installation/
 ```
 
-Or use the provided convenience script:
+After installing `task`, verify you can run tasks:
+```bash
+task --list
+```
+
+## Development workflow
+
+All common development tasks are available through the `Taskfile.yml`. Use these commands to manage the project:
+
+| Task | Description |
+|------|-------------|
+| `task run` | Run the Streamlit app (dev mode) |
+| `task build` | Run quick project build checks: syntax, optional lint |
+| `task build-image` | Build Docker image tagged `barbarapp:latest` |
+| `task run-image` | Run Docker image (exposes port 8501) |
+| `task reset-db` | Reset the SQLite database (delete and reinitialize) |
+| `task show-db` | Quick check of DB tables (requires `sqlite3` CLI) |
+
+### Quick start
 
 ```bash
-./run_checks.sh
-```
-# Or with a plain venv and pip:
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+# Sync dependencies (runs automatically on first `task` invocation, but can be run explicitly)
+uv sync
+
+# Run the app locally
+task run
 ```
 
-2. Run locally:
+The app will be available at `http://localhost:8501`.
+
+## First-run bootstrap
+
+On first run, if there are no users in the database you will be prompted to create an initial administrator account. This bootstrap flow is handled in `views/login.py`.
+
+## Database
+
+- Default SQLite database: `data/data.db` (created automatically).
+- Database is initialized on app startup (`libs/db.py` → `init_db()`).
+- Use `task reset-db` to delete and reinitialize the database.
+- Use `task show-db` to list all tables (requires `sqlite3` CLI installed).
+
+## Docker
+
+Build and run the app in a container:
 
 ```bash
-streamlit run app.py
+# Build the Docker image
+task build-image
+
+# Run the container (maps port 8501 and persists data)
+task run-image
 ```
 
-3. First run will prompt to create the initial admin user (first-run bootstrap).
+The image is tagged as `barbarapp:latest` and includes `uv` to sync dependencies from `pyproject.toml`.
 
-Docker
+## Project info
 
-```bash
-docker build -t darts-planner .
-docker run -p 8501:8501 -v $(pwd)/data:/app/data darts-planner
-```
+- **Python version**: >= 3.11 (as specified in `pyproject.toml`)
+- **Dependencies**: Declared in `pyproject.toml` under `[project].dependencies`
+- **Dependency manager**: `uv` (https://docs.astral.sh/uv/)
+- **Task runner**: `task` (https://taskfile.dev/)
 
-Data: the app uses SQLite at `data/data.db` by default.
+---
+
+For questions or to report issues, please open an issue or submit a PR. 🎯
